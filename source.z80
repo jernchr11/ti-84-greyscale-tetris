@@ -1,0 +1,1742 @@
+==========================================================
+;Greyscale Tetris
+;==========================================================
+        .nolist
+#ifdef VTI
+ #define TI83P
+#endif
+ #include "keyval.inc"
+        #include        "ion.inc"
+        .list
+#ifdef  TI83P
+        .org    progstart-2
+        .db     $BB,$6D
+#else
+        .org    progstart
+#endif
+        ret
+        jr      nc,start_of_program
+        .db     "Greyscale Tetris'",0
+start_of_program:
+;==========================================================
+; hello
+;==========================================================
+    ld a,0
+ ld (GameOver),a
+ call gsClearbuffer
+ call gsEnable
+ call gsSetFreq
+ 
+ ld hl,Image1_Layer1
+ ld de,gsActivebuf1
+ ld bc,768
+ ldir
+ ld hl,Image2_Layer1
+ ld de,gsActivebuf2
+ ld bc,768
+ ldir
+  Call New_Piece
+ 
+ 
+Keys:
+    ld a,(GameOver)
+ cp 1
+ jp z,Over
+ ld a,$FF
+     nop
+     out (1),a
+     ld a,$BF
+     out (1),a
+     nop
+     nop
+     in a,(1)
+     cp $FE
+     jp z,Enter
+ ld a,$FF
+     nop
+     out (1),a 
+ 
+     ld a,$FE
+  out (1),a
+  nop
+  nop
+  in a,(1)
+  cp $FD
+  Call z,Left
+  ld a,$FF
+  out (1),a
+  ld a,$FE
+  out (1),a
+  nop
+  nop
+  in a,(1)
+  cp $FB
+  Call z,Right
+ 
+  ld a,$FF
+  nop
+  nop
+  out (1),a
+ 
+     ld a,$FE
+      out (1),a
+      nop
+      nop
+      in a,(1)
+      cp $FE
+      Call z,Down 
+   ld a,(Blah)
+   cp 7
+   jp nz,CowFish
+   ld a,0
+   ld (Blah),a
+   Call Gravity
+CowFish:
+      inc a
+   ld (Blah),a
+  
+   ld b,50
+Super_Delay:
+   Call TempFill
+   Call TempFill
+   Call TempFill
+   Call TempFill
+   Call TempFill
+   Call TempFill
+   Call TempFill
+   Call TempFill
+   Call TempFill
+   Call TempFill
+   Call TempFill
+   Call TempFill
+   Call TempFill
+   Call TempFill
+   Call TempFill
+   Call TempFill
+   Call TempFill
+   Call TempFill
+   Call TempFill
+   Call TempFill
+   Call TempFill
+   Call TempFill
+   Call TempFill
+   Call TempFill
+   djnz Super_Delay
+  ld a,$FF
+  nop
+  nop
+  out (1),a 
+  
+    
+ 
+  jp Keys
+;-----------------------------------------------------------------------------------------
+;-----------------------------------------------------------------------------------------
+;-----------------------------------------------------------------------------------------
+;-----------------------------------------------------------------------------------------
+;-----------------------------------------------------------------------------------------
+;END OF KEYS
+Blah:
+     .db 0 
+Counter:         ;down
+     .db 0
+CounterB:
+     .db 0   ;left
+ 
+CounterC:
+     .db 0  ; right
+GameOver:
+     .db 0
+GameBye:
+     .db "Game Over!",0 
+Enter: 
+     Call gsDisable
+  im 1
+     ret
+ 
+Over:
+     Call gsDisable
+  im 1
+     ret 
+ 
+Down:
+    Call Gravity
+ ld a,(Counter)
+ cp 1
+ jp z,Finished
+    jp Down
+Finished:
+     ld a,0
+  ld (Counter),a
+  ret
+;-----------------------------------------------------------------------------------------
+;----------------------------------------------------------------------------------------- 
+Gravity:
+  ld a,0
+  ld (Counter),a
+  Call Bottom_Collision
+ 
+    ld a,(Counter)
+    cp 0
+    jp nz,Ohno
+    Call PieceOneReset
+    Call Draw_Tetris_Piece1
+    Call Draw_Tetris_Piece2
+    ld a,(Block_Structure+1)
+    inc a
+    ld (Block_Structure+1),a
+    Call Draw_Tetris_Piece1
+    Call Draw_Tetris_Piece2
+    Call SetpieceOne 
+ ret
+Ohno:
+    Call Check_Rows
+    Call New_Piece
+ ret
+;-----------------------------------------------------------------------------------------
+;-----------------------------------------------------------------------------------------
+;-----------------------------------------------------------------------------------------
+;LEFT 
+Left:
+     ld a,0
+  ld (CounterB),a
+  ld a,(Block_Structure)
+  cp 0
+  jp z,SkipBlah
+  Call Left_Collide
+  ld a,(CounterB)
+  cp 0
+  ret nz
+     Call Draw_Tetris_Piece1
+    Call Draw_Tetris_Piece2
+     Call PieceOneReset
+  ld a,(Block_Structure)
+  dec a
+  ld (Block_Structure),a
+    Call Draw_Tetris_Piece1
+    Call Draw_Tetris_Piece2
+    Call SetpieceOne 
+SkipBlah: 
+  ret
+;-----------------------------------------------------------------------------------------
+;-----------------------------------------------------------------------------------------
+;-----------------------------------------------------------------------------------------
+;END OF LEFT
+ 
+;-----------------------------------------------------------------------------------------
+;-----------------------------------------------------------------------------------------
+;-----------------------------------------------------------------------------------------
+;-----------------------------------------------------------------------------------------
+;RIGHT
+Right:
+     ld a,0
+  ld (CounterC),a
+     Call Right_Collide
+  ld a,(CounterC)
+  cp 0
+  ret nz
+     Call Draw_Tetris_Piece1
+       Call Draw_Tetris_Piece2
+     Call PieceOneReset
+  ld a,(Block_Structure)
+  inc a
+  ld (Block_Structure),a
+    Call Draw_Tetris_Piece1
+      Call Draw_Tetris_Piece2
+    Call SetpieceOne
+SkipBlahx: 
+  ret
+;-----------------------------------------------------------------------------------------
+;-----------------------------------------------------------------------------------------
+;-----------------------------------------------------------------------------------------
+CounterD:
+     .db 0
+ 
+Check_Rows:
+    ld hl,TestrisMtrx
+    ld a,(Block_Structure+1)
+    cp 0
+  jr z,Aligne
+  ld b,a
+  ld de,15
+Addup:
+        add hl,de
+  djnz Addup
+Aligne:
+
+        ld b,15
+Find_Rows:
+  ld a,(hl)
+  cp 0
+  jp nz,RoflCat
+  ld a,1
+  ld (CounterD),a
+RoflCat:
+        inc hl
+  djnz Find_Rows
+  
+        ld a,(CounterD)
+        cp 0
+  
+  Call z,Delete_Line
+  
+  ld a,0
+  ld (CounterD),a
+  ld a,(Block_Structure+1)
+  inc a
+  cp 12
+  jr z,Finishedq
+        ld (Block_Structure+1),a
+        jp Aligne
+Finishedq:
+        ret  
+Delete_Line:
+    push af
+ push bc
+ push de
+ push hl
+   
+  
+    ld hl,TestrisMtrx
+    ld a,(Block_Structure+1)
+    cp 0
+  jr z,Alignezz
+  ld b,a
+  ld de,15
+Addupzz:
+        add hl,de
+  djnz Addupzz
+Alignezz:
+        ld a,(Block_Structure+1)
+        ld b,a
+        push hl
+  ld de,-15
+  add hl,de
+  pop de
+Reset_Loop:
+  
+  push bc
+  push hl
+  push de
+  ld bc,15
+  ldir
+  pop de
+  pop hl
+  pop bc
+           dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+   dec hl
+   dec hl
+   dec hl
+  
+   dec de
+   dec de
+   dec de
+   dec de
+   dec de
+   dec de
+   dec de
+   dec de
+   dec de
+      dec de
+        dec de
+          dec de
+         dec de
+         dec de
+         dec de
+        
+  djnz Reset_Loop
+  
+  
+  
+  
+  
+  
+
+        ld hl,gsactivebuf1 + 48
+     ld a,(Block_Structure+1) ; y cor
+  cp 0
+  jr z,Dont_Inc2qq
+  ld b,a
+  ld de,60
+Add_Loop2qq:
+       add hl,de
+  djnz Add_Loop2qq
+Dont_Inc2qq:
+        ld a,(Block_Structure+1)
+  ld b,a
+  add a,a
+  add a,a
+  add a,b
+  ld b,a  ; counter!
+      
+
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl   
+         push hl
+   pop de
+   push hl
+   ld hl,60
+   add hl,de
+   ex de,hl
+   pop hl
+  
+  
+  
+Move_Pic_Loop:
+        push bc  
+        push hl
+  push de
+  ld bc,9
+        ldir
+  pop de
+  pop hl
+  pop bc
+  
+ 
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+  
+   dec de
+   dec de
+   dec de
+   dec de
+   dec de
+   dec de
+   dec de
+   dec de
+   dec de
+      dec de
+        dec de
+          dec de
+        
+    
+    
+  
+        djnz Move_Pic_Loop
+  
+  
+       ld hl,gsactivebuf2 + 48
+     ld a,(Block_Structure+1) ; y cor
+  cp 0
+  jr z,Dont_Inc2qq4
+  ld b,a
+  ld de,60
+Add_Loop2qq4:
+       add hl,de
+  djnz Add_Loop2qq4
+Dont_Inc2qq4:
+        ld a,(Block_Structure+1)
+  ld b,a
+  add a,a
+  add a,a
+  add a,b
+  ld b,a  ; counter!
+      
+
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl   
+         push hl
+   pop de
+   push hl
+   ld hl,60
+   add hl,de
+   ex de,hl
+   pop hl
+  
+  
+  
+Move_Pic_Loop4:
+        push bc  
+        push hl
+  push de
+  ld bc,9
+        ldir
+  pop de
+  pop hl
+  pop bc
+  
+ 
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+         dec hl
+  
+   dec de
+   dec de
+   dec de
+   dec de
+   dec de
+   dec de
+   dec de
+   dec de
+   dec de
+      dec de
+        dec de
+          dec de
+        
+    
+    
+  
+        djnz Move_Pic_Loop4 
+  
+  
+  pop hl
+  pop de
+  pop bc
+  pop af
+  
+  ret 
+
+Bottom_Collision:
+       ld hl,TestrisMtrx
+  ld a,(Block_Structure)
+  ld e,a
+  ld d,0
+  add hl,de
+        ld a,(Block_Structure+1)
+  cp 0
+  jr z,AlignedLolxee
+  ld b,a
+  ld de,15
+LoopADDxee:
+        add hl,de
+  djnz LoopADDxee
+AlignedLolxee:
+     ld a,(Block_Structure+2)
+  cp 1
+       jr z,Onezxrr
+    cp 2
+    jr z,Twozxrr
+    cp 3
+    jr z,Threezxrr
+    cp 4
+    jr z,Fourzxrr
+    cp 5
+    jr z, Fivezxrr
+    cp 6
+    jr z, Sixzxrr
+    cp 7
+    jr z,Sevenzxrr
+Onezxrr:
+       ld de,PieceOne
+    inc de
+    jr Rawrrr
+Twozxrr:
+       ld de,PieceTwo
+       inc de
+       jr Rawrrr
+Threezxrr:
+       ld de,PieceThree
+       inc de
+       jr Rawrrr
+Fourzxrr:
+       ld de,PieceFour
+       inc de
+       jr Rawrrr
+Fivezxrr:
+       ld de,PieceFive
+       inc de
+       jr Rawrrr
+Sixzxrr:
+       ld de,PieceSix
+       inc de
+       jr Rawrrr
+Sevenzxrr:
+       ld de,PieceSeven
+       inc de
+       jr Rawrrr
+Rawrrr:   
+       ld b,5
+Delete_Loopqq:
+       push bc
+    ld b,4
+Resettt:
+       ld a,(de)
+    cp 2
+    jr z,Cough
+    cp 5
+    jr z,Cough
+    cp 6
+    jr z,Cough
+    
+    jr No_Resettt
+Cough:
+        ld a,(hl)
+  cp 1
+  jp nz,No_Resettt
+  ld a,1
+  ld (Counter),a
+No_Resettt:
+       inc de
+    inc hl
+    djnz Resettt
+    push de
+    ld de,11
+    add hl,de
+    pop de
+    pop bc
+    djnz Delete_Loopqq
+    ret
+   
+      
+Left_Collide:
+       ld hl,TestrisMtrx
+  ld a,(Block_Structure)
+  ld e,a
+  ld d,0
+  add hl,de
+        ld a,(Block_Structure+1)
+  cp 0
+  jr z,AlignedLolxeexc
+  ld b,a
+  ld de,15
+LoopADDxeexc:
+        add hl,de
+  djnz LoopADDxeexc
+AlignedLolxeexc:
+     ld a,(Block_Structure+2)
+  cp 1
+       jr z,Onezxrrxc
+    cp 2
+    jr z,Twozxrrxc
+    cp 3
+    jr z,Threezxrrxc
+    cp 4
+    jr z,Fourzxrrxc
+    cp 5
+    jr z,Fivezxrrxc
+    cp 6
+    jr z,Sixzxrrxc
+    cp 7
+    jr z,Sevenzxrrxc
+Onezxrrxc:
+       ld de,PieceOne
+    inc de
+    jr Rawrrrxc
+Twozxrrxc:
+       ld de,PieceTwo
+       inc de
+       jr Rawrrrxc
+Threezxrrxc:
+       ld de,PieceThree
+       inc de
+       jr Rawrrrxc
+Fourzxrrxc:
+       ld de,PieceFour
+       inc de
+       jr Rawrrrxc
+Fivezxrrxc:
+       ld de,PieceFive
+       inc de
+       jr Rawrrrxc
+Sixzxrrxc:
+       ld de,PieceSix
+       inc de
+       jr Rawrrrxc
+Sevenzxrrxc:
+       ld de,PieceSeven
+       inc de
+       jr Rawrrrxc
+Rawrrrxc:   
+       ld b,4
+Delete_Loopqqxc:
+Resetttxc:
+       ld a,(de)
+    cp 1
+    jr nz, Next_Check
+     dec hl
+        ld a,(hl)
+  inc hl
+  cp 1
+  jr nz,Next_Check
+  ld a,1
+  ld (CounterB),a
+No_Resetttxc:
+           inc de
+    inc de
+    inc de
+    inc de
+    push de
+    ld de,15
+    add hl,de
+    pop de
+    djnz Resetttxc 
+    ret   
+  
+Next_Check:
+           push hl
+           push de
+           push bc
+           ld b,4
+Looped:
+           ld a,(de)
+           cp 5
+           jr z,Moo
+           cp 3
+           jr z,Moo
+     jr Lame
+Moo:
+           ld a,(hl)
+           cp 1
+           jr nz,Lame
+      
+           ld a,1
+           ld (CounterB),a
+          
+Lame:
+           inc hl
+           inc de
+           djnz Looped
+           pop bc
+           pop de
+           pop hl
+           jr No_Resetttxc
+    
+    
+    
+Right_Collide:
+       ld hl,TestrisMtrx
+  ld a,(Block_Structure)
+  ld e,a
+  ld d,0
+  add hl,de
+        ld a,(Block_Structure+1)
+  cp 0
+  jr z,AlignedLolxeexcaa
+  ld b,a
+  ld de,15
+LoopADDxeexcaa:
+        add hl,de
+  djnz LoopADDxeexcaa
+AlignedLolxeexcaa:
+     ld a,(Block_Structure+2)
+  cp 1
+       jr z,Onezxrrxcaa
+    cp 2
+    jr z,Twozxrrxcaa
+    cp 3
+    jr z,Threezxrrxcaa
+    cp 4
+    jr z,Fourzxrrxcaa
+    cp 5
+    jr z,Fivezxrrxcaa
+    cp 6
+        jr z,Sixzxrrxcaa
+    cp 7
+        jp z,SevenMoo
+Onezxrrxcaa:
+       ld de,PieceOne
+    inc de
+    jr Rawrrrxcaa
+Twozxrrxcaa:
+       ld de,PieceTwo
+       inc de
+       jr Rawrrrxcaa
+Threezxrrxcaa:
+       ld de,PieceThree
+       inc de
+       jr Rawrrrxcaa
+Fourzxrrxcaa:
+       ld de,PieceFour
+       inc de
+       jr Rawrrrxcaa
+Fivezxrrxcaa:
+       ld de,PieceFive
+       inc de
+       jr Rawrrrxcaa
+Sixzxrrxcaa:
+       ld de,PieceSix
+       inc de
+       jr Rawrrrxcaa
+SevenMoo:
+       ld de,PieceSeven
+       inc de
+       jr Rawrrrxcaa  
+   
+   
+Rawrrrxcaa:   
+       inc de
+    inc de
+    inc de
+    inc hl
+    inc hl
+    inc hl
+       ld b,4
+Delete_Loopqqxcaa:
+Resetttxcaa:
+       ld a,(de)
+    cp 1
+    jr nz, Next_Checkaa
+     inc hl
+        ld a,(hl)
+  dec hl
+  cp 1
+  jr nz,Next_Checkaa
+  ld a,1
+  ld (CounterC),a
+No_Resetttxcaa:
+           inc de
+    inc de
+    inc de
+    inc de
+    push de
+    ld de,15
+    add hl,de
+    pop de
+    djnz Resetttxcaa 
+    ret   
+  
+Next_Checkaa:
+           push hl
+           push de
+           push bc
+     dec hl
+     dec hl
+     dec hl
+     dec de
+     dec de
+     dec de
+           ld b,4
+Loopedaa:
+           ld a,(de)
+           cp 6
+           jr z,Mooaa
+           cp 4
+           jr z,Mooaa
+     jr Lameaa
+Mooaa:
+           ld a,(hl)
+           cp 1
+           jr nz,Lameaa
+      
+           ld a,1
+           ld (CounterC),a
+          
+Lameaa:
+           inc hl
+           inc de
+           djnz Loopedaa
+           pop bc
+           pop de
+           pop hl
+           jr No_Resetttxcaa    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+ 
+
+New_Piece:
+  ;-----> Generate a random number
+; ouput a=answer 0<=a<=255
+; all registers are preserved except: af
+Randz:
+        push    hl
+       push    de
+       ld      hl,(randData)
+      ld      a,r
+       ld      d,a
+        ld      e,(hl)    ; get new tetris piece
+        add     hl,de
+        add     a,l
+        xor     h
+       ld      (randData),hl
+        pop     de
+        pop     hl
+  
+     and %00000111
+        cp 0
+  jr z,Randz 
+StructureBlockOne:
+  ld (Block_Structure+2),a
+        ld a,6
+  ld (Block_Structure),a
+  ld a,0
+  ld (Block_Structure+1),a
+  Call Draw_Tetris_Piece1
+        Call Draw_Tetris_Piece2
+        Call SetpieceOne
+  ret
+  
+SetpieceOne:
+        ld hl,TestrisMtrx
+  ld a,(Block_Structure)
+  ld e,a
+  ld d,0
+  add hl,de
+        ld a,(Block_Structure+1)
+  cp 0
+  jr z,AlignedLolxx
+  ld b,a
+  ld de,15
+LoopADDxx:
+        add hl,de
+  djnz LoopADDxx
+AlignedLolxx:
+       
+     ld a,(Block_Structure+2)
+  cp 1
+       jr z,Onezxx
+    cp 2
+    jr z,Twozxx
+    cp 3
+    jr z,Threezxx
+    cp 4
+    jr z,Fourzxx
+    cp 5
+    jr z,Fivezxx
+    cp 6
+    jr z,Sixzxx
+    cp 7
+    jr z,Sevenzxx
+Onezxx:
+       ld de,PieceOne
+    inc de
+    jr Rawrx
+Twozxx:
+       ld de,PieceTwo
+       inc de
+       jr Rawrx
+Threezxx:
+       ld de,PieceThree
+       inc de
+       jr Rawrx
+Fourzxx:
+       ld de,PieceFour
+       inc de
+       jr Rawrx
+Fivezxx:
+       ld de,PieceFive
+       inc de
+       jr Rawrx
+Sixzxx:
+       ld de,PieceSix
+       inc de
+       jr Rawrx
+Sevenzxx:
+       ld de,PieceSeven
+       inc de
+       jr Rawrx
+Rawrx:   
+       ld b,4
+Delete_Loopx:
+       push bc
+    ld b,4
+Resetx:
+       ld a,(de)
+    cp 1
+    jr nz, No_Resetx
+    ld a,(hl)
+    cp 1
+    jr nz,ContinueBeef
+    ld a,1
+    ld (GameOver),a
+ContinueBeef:   
+    ld a,1
+    ld (hl),a
+No_Resetx:
+       inc de
+    inc hl
+    djnz Resetx
+    push de
+    ld de,11
+    add hl,de
+    pop de
+    pop bc
+    djnz Delete_Loopx
+    ret
+   
+   
+  
+PieceOneReset:
+        ld hl,TestrisMtrx
+  ld a,(Block_Structure)
+  ld e,a
+  ld d,0
+  add hl,de
+        ld a,(Block_Structure+1)
+  cp 0
+  jr z,AlignedLolx
+  ld b,a
+  ld de,15
+LoopADDx:
+        add hl,de
+  djnz LoopADDx
+AlignedLolx:
+     ld a,(Block_Structure+2)
+  cp 1
+       jr z,Onezx
+    cp 2
+    jr z,Twozx
+    cp 3
+    jr z,Threezx
+    cp 4
+    jr z,Fourzx
+    cp 5
+    jr z,Fivezx
+    cp 6
+    jr z,Sixzx
+    cp 7
+    jr z,Sevenzx
+Onezx:
+       ld de,PieceOne
+    inc de
+    jr Rawr
+Twozx:
+       ld de,PieceTwo
+       inc de
+       jr Rawr
+Threezx:
+       ld de,PieceThree
+       inc de
+       jr Rawr
+Fourzx:
+       ld de,PieceFour
+       inc de
+       jr Rawr
+Fivezx:
+       ld de,PieceFive
+       inc de
+       jr Rawr
+Sixzx:
+       ld de,PieceSix
+       inc de
+       jr Rawr
+Sevenzx:
+       ld de,PieceSeven
+       inc de
+       jr Rawr
+Rawr:   
+       ld b,4
+Delete_Loop:
+       push bc
+    ld b,4
+Reset:
+       ld a,(de)
+    cp 1
+    jr nz, No_Reset
+   
+    ld a,0
+    ld (hl),a
+No_Reset:
+       inc de
+    inc hl
+    djnz Reset
+   
+    push de
+    ld de,11
+    add hl,de
+    pop de
+    pop bc
+    djnz Delete_Loop
+    ret  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+Draw_Tetris_Piece1:
+      ld hl,gsActivebuf1 + 48
+      ld a,(Block_Structure) ; x cor
+       ld b,a
+     add a,a
+    add a,a  ; x * 5
+      add a,b 
+       push af
+     ld a,(Block_Structure+1) ; y cor
+  cp 0
+  jr z,Dont_Inc
+  ld b,a
+  ld de,60
+Add_Loop:
+       add hl,de
+  djnz Add_Loop
+Dont_Inc:
+       ld a,(Block_Structure+2)
+    cp 1
+       jr z,Onez
+    cp 2
+    jr z,Twoz
+    cp 3
+    jr z,Threez
+    cp 4
+    jr z,Fourz
+    cp 5
+    jr z,Fivez
+    cp 6
+    jr z,Sixz
+    cp 7
+    jr z,Sevenz
+Onez:
+       ld de,PieceOne
+       jr Next
+Twoz:
+    ld de,PieceTwo
+    jr Next
+Threez:
+    ld de,PieceThree
+    jr Next
+Fourz:
+    ld de,PieceFour
+    jr Next
+Fivez:
+       ld de,PieceFive
+       jr Next
+Sixz:
+       ld de,PieceSix
+       jr Next
+Sevenz:
+       ld de,PieceSeven
+       jr Next
+Next:
+
+    ld a,(de)
+    cp 1
+    jr z,Onez_Tiled
+    cp 2
+    jr z,Twoz_Tiled
+    cp 3
+    jr z,Threez_Tiled
+    cp 4
+    jr z,Fourz_Tiled
+Onez_Tiled:
+       ld ix,Tile_One
+    jr Next2
+Twoz_Tiled:
+       ld ix,Tile_Two
+    jr Next2
+Threez_Tiled:
+       ld ix,Tile_Three
+    jr Next2
+Fourz_Tiled
+       ld ix,Tile_Four
+    jr Next2
+Next2:
+      inc de
+       pop af
+       ld b,4
+Draw_Loop:
+       push bc
+       ld b,4   
+Funny_Loop:
+       push af
+       ld a,(de)
+    cp 1
+    jr nz,Skip_Tile
+    pop af
+   
+    push af
+    push bc
+    push hl
+    push de
+    push ix
+    ld b,5
+       Call PutSpriteXOR
+    pop ix
+    pop de
+    pop hl
+    pop bc
+Skip_Tile:
+    pop af
+    inc a
+    inc a
+    inc a
+    inc a
+    inc a
+    inc de
+    djnz Funny_Loop
+    ld b,20
+    sub b
+    push de
+    ld de,60
+    add hl,de
+    pop de
+    pop bc
+    djnz Draw_Loop
+    ret
+ 
+Draw_Tetris_Piece2:
+      ld hl,gsActivebuf2 + 48
+      ld a,(Block_Structure) ; x cor
+       ld b,a
+     add a,a
+    add a,a  ; x * 5
+      add a,b 
+       push af
+     ld a,(Block_Structure+1) ; y cor
+  cp 0
+  jr z,Dont_Inc1
+  ld b,a
+  ld de,60
+Add_Loop1:
+       add hl,de
+  djnz Add_Loop1
+Dont_Inc1:
+       ld a,(Block_Structure+2)
+    cp 1
+       jr z,Onez1
+    cp 2
+    jr z,Twoz1
+    cp 3
+    jr z,Threez1
+    cp 4
+    jr z,Fourz1
+    cp 5
+    jr z,Fivez1
+    cp 6
+    jr z,Sixz1
+    cp 7
+    jr z,Sevenz1
+Onez1:
+       ld de,PieceOne
+       jr Next1
+Twoz1:
+    ld de,PieceTwo
+    jr Next1
+Threez1:
+    ld de,PieceThree
+    jr Next1
+Fourz1:
+    ld de,PieceFour
+    jr Next1
+Fivez1:
+       ld de,PieceFive
+       jr Next1
+Sixz1:
+       ld de,PieceSix
+       jr Next1
+Sevenz1:
+       ld de,PieceSeven
+       jr Next1
+Next1:
+
+    ld a,(de)
+    cp 1
+    jr z,Onez_Tiled1
+    cp 2
+    jr z,Twoz_Tiled1
+    cp 3
+    jr z,Threez_Tiled1
+    cp 4
+    jr z,Fourz_Tiled1
+Onez_Tiled1:
+       ld ix,Tile_One2
+    jr Next21
+Twoz_Tiled1:
+       ld ix,Tile_Two2
+    jr Next21
+Threez_Tiled1:
+       ld ix,Tile_Three2
+    jr Next21
+Fourz_Tiled1:
+       ld ix,Tile_Four2
+    jr Next21
+Next21:
+      inc de
+       pop af
+       ld b,4
+Draw_Loop1:
+       push bc
+       ld b,4   
+Funny_Loop1:
+       push af
+       ld a,(de)
+    cp 1
+    jr nz,Skip_Tile1
+    pop af
+   
+    push af
+    push bc
+    push hl
+    push de
+    push ix
+    ld b,5
+       Call PutSpriteXOR
+    pop ix
+    pop de
+    pop hl
+    pop bc
+Skip_Tile1:
+    pop af
+    inc a
+    inc a
+    inc a
+    inc a
+    inc a
+    inc de
+    djnz Funny_Loop1
+    ld b,20
+    sub b
+    push de
+    ld de,60
+    add hl,de
+    pop de
+    pop bc
+    djnz Draw_Loop1
+    ret   
+   
+   
+   
+   
+   
+   
+   
+
+   
+   
+   
+     
+  
+   
+Draw_Sprite:
+PutSpriteXOR:
+; A = x coordinate
+; E = y coordinate
+; B = number of rows
+; IX = address of sprite
+    ld d,0
+    LD     E, A
+    SRL    E
+    SRL    E
+    SRL    E
+    ADD    HL, DE
+    AND    7
+    JR     Z, _Aligned
+    LD     C, A
+    LD     DE, 12
+_RowLoop:
+    PUSH   BC
+    LD     B, C
+    LD     C, (IX)
+    XOR    A
+_ShiftLoop:
+    SRL    C
+    RRA
+    DJNZ   _ShiftLoop
+  INC    HL
+    XOR    (HL)
+    LD     (HL), A
+    DEC    HL
+    LD     A, C
+    XOR    (HL)
+    LD     (HL), A
+    ADD    HL, DE
+    INC    IX
+    POP    BC
+    DJNZ   _RowLoop
+    RET
+_Aligned:
+    LD     DE, 12
+_PutLoop
+    LD     A, (IX)
+    XOR    (HL)
+    LD     (HL), A
+    INC    IX
+    ADD    HL, DE
+    DJNZ   _PutLoop
+    RET
+fastCopy:
+   push af
+   push de
+   push hl
+   push bc
+   ld a,0
+   out ($20),a
+  di
+  ld a,$80
+  out ($10),a
+  ld hl,$9340-12-(-(12*64)+1)
+  ld a,$20
+  ld c,a
+  inc hl
+  dec hl
+fastCopyAgain:
+  ld b,64
+  inc c
+  ld de,-(12*64)+1
+  out ($10),a
+  add hl,de
+  ld de,10
+fastCopyLoop:
+  add hl,de
+  inc hl
+  inc hl
+  inc de
+  ld a,(hl)
+  out ($11),a
+  dec de
+  djnz fastCopyLoop
+  ld a,c
+  cp $2B+1
+  jr nz,fastCopyAgain
+   ld a,1
+   out ($20),a
+ pop bc
+ pop hl
+ pop de
+ pop af
+ ret
+TempFill:
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ nop
+ ret
+
+ 
+; IMAGE DATA
+;   DATA CONTAINED IN 4x4 MATRICES 
+; EXTRA 1 x 4 for  BOTTOM COLLISION DETECTION
+;PIECEX:
+;.db 2    ; image data
+; .db a,b,c,d  ; shape
+; .db a,b,c,d 
+; .db a,b,c,d 
+; .db a,b,c,d 
+;.db x,0,0,0    ; only needed if the piece is 4x1 vertical
+ 
+ 
+; 1 = Square
+; 2 = Bottom collision
+; 3 = Left_Collision
+; 5 = Left + Bottom Collision
+; 4 = Right
+;6 = Right+Down
+ 
+PieceOne:
+.db 3
+.db 1,1,4,0
+.db 1,1,4,0
+.db 2,2,0,0
+.db 0,0,0,0
+.db 0,0,0,0
+PieceTwo:
+.db 2
+.db 1,1,1,1
+.db 2,2,2,2
+.db 0,0,0,0
+.db 0,0,0,0
+.db 0,0,0,0
+PieceThree:
+.db 4
+.db 1,1,4,0
+.db 5,1,1,4
+.db 0,2,2,0
+.db 0,0,0,0
+.db 0,0,0,0
+PieceFour:
+.db 1
+.db 1,4,0,0
+.db 1,4,0,0
+.db 1,1,4,0
+.db 2,2,0,0
+.db 0,0,0,0
+PieceFive:
+.db 1
+.db 3,1,4,0
+.db 3,1,4,0
+.db 1,1,4,0
+.db 2,2,0,0
+.db 0,0,0,0
+PieceSix:
+.db 3
+.db 1,4,0,0
+.db 1,4,0,0
+.db 1,4,0,0
+.db 1,4,0,0
+.db 2,0,0,0
+;.db 3,1,1,4
+;.db 1,1,6,0
+;.db 2,2,0,0
+;.db 0,0,0,0
+PieceSeven
+.db 2
+.db 3,1,4,0
+.db 1,1,1,4
+.db 2,2,2,0
+.db 0,0,0,0
+.db 0,0,0,0
+
+Tile_One:
+.db %11111000
+.db %10001000
+.db %10101000
+.db %10001000
+.db %11111000
+Tile_One2:
+.db %11111000
+.db %11111000
+.db %11011000
+.db %11111000
+.db %11111000
+Tile_Two:
+.db %11111000
+.db %10011000
+.db %10101000
+.db %11001000
+.db %11111000
+Tile_Two2:
+.db %00000000
+.db %01100000
+.db %01010000
+.db %00110000
+.db %00000000
+Tile_Three:
+.db %11111000
+.db %11111000
+.db %11111000
+.db %11111000
+.db %11111000
+Tile_Three2:
+.db %11111000
+.db %10001000
+.db %10101000
+.db %10001000
+.db %11111000
+Tile_Four:
+.db %11111000
+.db %10001000
+.db %10001000
+.db %10001000
+.db %11111000
+Tile_Four2:
+.db %00000000
+.db %00000000
+.db %00000000
+.db %00000000
+.db %00000000
+ 
+
+   
+;END OF FIRSt BLOCK
+;struct block {
+; int x cor
+;int y cor
+;int block_type
+;int rotation
+;}   
+Block_Structure:
+      .db 0,0,0,0                       ;  x-cor,y-cor, piece, rotation
+  
+TestrisMtrx:
+.db 0,0,0,0,0,0,0,0,0,0,0,0,0,0,1  
+.db 0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 
+.db 0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 
+.db 0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 
+.db 0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 
+.db 0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 
+.db 0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 
+.db 0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 
+.db 0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 
+.db 0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 
+.db 0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+.db 0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 
+.db 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1  
+Image1_Layer1:
+.db $00,$00,$00,$00,$00,$00,$00,$00,$01,$FF,$FF,$FF,$00,$00,$00,$00
+.db $00,$00,$00,$00,$02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+.db $02,$0F,$FF,$C0,$00,$00,$00,$00,$00,$00,$00,$00,$02,$1F,$FF,$E0
+.db $00,$00,$00,$00,$00,$00,$00,$00,$02,$38,$78,$70,$00,$00,$00,$00
+.db $00,$00,$00,$00,$02,$30,$78,$30,$00,$00,$00,$00,$00,$00,$00,$00
+.db $02,$20,$78,$10,$00,$00,$00,$00,$00,$00,$00,$00,$02,$00,$78,$00
+.db $00,$00,$00,$00,$00,$00,$00,$00,$02,$00,$78,$00,$00,$00,$00,$00
+.db $00,$00,$00,$00,$02,$00,$78,$00,$00,$00,$00,$00,$00,$00,$00,$00
+.db $02,$00,$78,$00,$00,$00,$00,$00,$00,$00,$00,$00,$02,$00,$78,$00
+.db $00,$00,$00,$00,$00,$00,$00,$00,$02,$00,$78,$00,$00,$00,$00,$00
+.db $00,$00,$00,$00,$02,$00,$78,$00,$00,$00,$00,$00,$00,$00,$00,$00
+.db $02,$00,$78,$00,$00,$00,$00,$00,$00,$00,$00,$00,$02,$00,$78,$00
+.db $00,$00,$00,$00,$00,$00,$00,$00,$02,$00,$78,$00,$00,$00,$00,$00
+.db $00,$00,$00,$00,$02,$00,$78,$00,$00,$00,$00,$00,$00,$00,$00,$00
+.db $02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$02,$00,$00,$00
+.db $00,$00,$00,$00,$00,$00,$00,$00,$02,$00,$00,$00,$00,$00,$00,$00
+.db $00,$00,$00,$00,$02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+.db $02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$02,$00,$00,$00
+.db $00,$00,$00,$00,$00,$00,$00,$00,$02,$00,$00,$00,$00,$00,$00,$00
+.db $00,$00,$00,$00,$02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+.db $02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$02,$00,$00,$00
+.db $00,$00,$00,$00,$00,$00,$00,$00,$02,$00,$00,$00,$00,$00,$00,$00
+.db $00,$00,$00,$00,$02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+.db $02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$02,$00,$00,$00
+.db $00,$00,$00,$00,$00,$00,$00,$00,$02,$00,$00,$00,$00,$00,$00,$00
+.db $00,$00,$00,$00,$02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+.db $02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$02,$00,$00,$00
+.db $00,$00,$00,$00,$00,$00,$00,$00,$02,$00,$00,$00,$00,$00,$00,$00
+.db $00,$00,$00,$00,$02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+.db $02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$02,$00,$00,$00
+.db $00,$00,$00,$00,$00,$00,$00,$00,$02,$00,$00,$00,$00,$00,$00,$00
+.db $00,$00,$00,$00,$02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+.db $02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$02,$00,$00,$00
+.db $00,$00,$00,$00,$00,$00,$00,$00,$02,$00,$00,$00,$00,$00,$00,$00
+.db $00,$00,$00,$00,$02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+.db $02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$02,$00,$00,$00
+.db $00,$00,$00,$00,$00,$00,$00,$00,$02,$00,$00,$00,$00,$00,$00,$00
+.db $00,$00,$00,$00,$02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+.db $02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$02,$00,$00,$00
+.db $00,$00,$00,$00,$00,$00,$00,$00,$02,$00,$00,$00,$00,$00,$00,$00
+.db $00,$00,$00,$00,$02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+.db $02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$02,$00,$00,$00
+.db $00,$00,$00,$00,$00,$00,$00,$00,$02,$00,$00,$00,$00,$00,$00,$00
+.db $00,$00,$00,$00,$02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+.db $02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$02,$00,$00,$00
+.db $00,$00,$00,$00,$00,$00,$00,$00,$02,$00,$00,$00,$00,$00,$00,$00
+.db $00,$00,$00,$00,$02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+.db $02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01,$FF,$FF,$FF
+Image2_Layer1:
+.db $00,$00,$00,$00,$00,$00,$00,$00,$01,$FF,$FF,$FF,$00,$00,$00,$00
+.db $00,$00,$00,$00,$03,$FF,$FF,$FF,$00,$00,$00,$00,$00,$00,$00,$00
+.db $03,$F0,$00,$3F,$00,$00,$00,$00,$00,$00,$00,$00,$03,$E0,$00,$1F
+.db $00,$00,$00,$00,$00,$00,$00,$00,$03,$C7,$87,$8F,$00,$00,$00,$00
+.db $00,$00,$00,$00,$03,$CF,$87,$CF,$00,$00,$00,$00,$00,$00,$00,$00
+.db $03,$DF,$87,$EF,$00,$00,$00,$00,$00,$00,$00,$00,$03,$FF,$87,$FF
+.db $00,$00,$00,$00,$00,$00,$00,$00,$03,$FF,$87,$FF,$00,$00,$00,$00
+.db $00,$00,$00,$00,$03,$FF,$87,$FF,$00,$00,$00,$00,$00,$00,$00,$00
+.db $03,$FF,$87,$FF,$00,$00,$00,$00,$00,$00,$00,$00,$03,$FF,$87,$FF
+.db $00,$00,$00,$00,$00,$00,$00,$00,$03,$FF,$87,$FF,$00,$00,$00,$00
+.db $00,$00,$00,$00,$03,$FF,$87,$FF,$00,$00,$00,$00,$00,$00,$00,$00
+.db $03,$FF,$87,$FF,$00,$00,$00,$00,$00,$00,$00,$00,$03,$FF,$87,$FF
+.db $00,$00,$00,$00,$00,$00,$00,$00,$03,$FF,$87,$FF,$00,$00,$00,$00
+.db $00,$00,$00,$00,$03,$FF,$87,$FF,$00,$00,$00,$00,$00,$00,$00,$00
+.db $03,$FF,$FF,$FF,$00,$00,$00,$00,$00,$00,$00,$00,$03,$FF,$FF,$FF
+.db $00,$00,$00,$00,$00,$00,$00,$00,$03,$FF,$FF,$FF,$00,$00,$00,$00
+.db $00,$00,$00,$00,$03,$FF,$FF,$FF,$00,$00,$00,$00,$00,$00,$00,$00
+.db $03,$FF,$FF,$FF,$00,$00,$00,$00,$00,$00,$00,$00,$03,$FF,$FF,$FF
+.db $00,$00,$00,$00,$00,$00,$00,$00,$03,$FF,$FF,$FF,$00,$00,$00,$00
+.db $00,$00,$00,$00,$03,$FF,$FF,$FF,$00,$00,$00,$00,$00,$00,$00,$00
+.db $03,$FF,$FF,$FF,$00,$00,$00,$00,$00,$00,$00,$00,$03,$FF,$FF,$FF
+.db $00,$00,$00,$00,$00,$00,$00,$00,$03,$FF,$FF,$FF,$00,$00,$00,$00
+.db $00,$00,$00,$00,$03,$FF,$FF,$FF,$00,$00,$00,$00,$00,$00,$00,$00
+.db $03,$FF,$FF,$FF,$00,$00,$00,$00,$00,$00,$00,$00,$03,$FF,$FF,$FF
+.db $00,$00,$00,$00,$00,$00,$00,$00,$03,$FF,$FF,$FF,$00,$00,$00,$00
+.db $00,$00,$00,$00,$03,$FF,$FF,$FF,$00,$00,$00,$00,$00,$00,$00,$00
+.db $03,$FF,$FF,$FF,$00,$00,$00,$00,$00,$00,$00,$00,$03,$FF,$FF,$FF
+.db $00,$00,$00,$00,$00,$00,$00,$00,$03,$FF,$FF,$FF,$00,$00,$00,$00
+.db $00,$00,$00,$00,$03,$FF,$FF,$FF,$00,$00,$00,$00,$00,$00,$00,$00
+.db $03,$FF,$FF,$FF,$00,$00,$00,$00,$00,$00,$00,$00,$03,$FF,$FF,$FF
+.db $00,$00,$00,$00,$00,$00,$00,$00,$03,$FF,$FF,$FF,$00,$00,$00,$00
+.db $00,$00,$00,$00,$03,$FF,$FF,$FF,$00,$00,$00,$00,$00,$00,$00,$00
+.db $03,$FF,$FF,$FF,$00,$00,$00,$00,$00,$00,$00,$00,$03,$FF,$FF,$FF
+.db $00,$00,$00,$00,$00,$00,$00,$00,$03,$FF,$FF,$FF,$00,$00,$00,$00
+.db $00,$00,$00,$00,$03,$FF,$FF,$FF,$00,$00,$00,$00,$00,$00,$00,$00
+.db $03,$FF,$FF,$FF,$00,$00,$00,$00,$00,$00,$00,$00,$03,$FF,$FF,$FF
+.db $00,$00,$00,$00,$00,$00,$00,$00,$03,$FF,$FF,$FF,$00,$00,$00,$00
+.db $00,$00,$00,$00,$03,$FF,$FF,$FF,$00,$00,$00,$00,$00,$00,$00,$00
+.db $03,$FF,$FF,$FF,$00,$00,$00,$00,$00,$00,$00,$00,$03,$FF,$FF,$FF
+.db $00,$00,$00,$00,$00,$00,$00,$00,$03,$FF,$FF,$FF,$00,$00,$00,$00
+.db $00,$00,$00,$00,$03,$FF,$FF,$FF,$00,$00,$00,$00,$00,$00,$00,$00
+.db $03,$FF,$FF,$FF,$00,$00,$00,$00,$00,$00,$00,$00,$03,$FF,$FF,$FF
+.db $00,$00,$00,$00,$00,$00,$00,$00,$03,$FF,$FF,$FF,$00,$00,$00,$00
+.db $00,$00,$00,$00,$03,$FF,$FF,$FF,$00,$00,$00,$00,$00,$00,$00,$00
+.db $03,$FF,$FF,$FF,$00,$00,$00,$00,$00,$00,$00,$00,$03,$FF,$FF,$FF
+.db $00,$00,$00,$00,$00,$00,$00,$00,$03,$FF,$FF,$FF,$00,$00,$00,$00
+.db $00,$00,$00,$00,$03,$FF,$FF,$FF,$00,$00,$00,$00,$00,$00,$00,$00
+.db $03,$FF,$FF,$FF,$00,$00,$00,$00,$00,$00,$00,$00,$01,$FF,$FF,$FF
+  
+  
+  
+randData:
+       .db 5,0,0,0,0
+;==========================================================
+; grayscale include file
+;==========================================================
+; comment these defines in or out to activate/deactivate them
+;#DEFINE NODOUBLEBUFFER ;when on,routines write directly to screen (faster and smaller)
+;#DEFINE 3LEVELGRAY ;makes it 3-level grayscale (a bit faster)
+#DEFINE XORSPRITE ;includes gsPutSprite
+#DEFINE LARGESPRITE ;includes gsLargeSprite
+#DEFINE ALIGNEDSPRITE ;includes gsAlignedsprite
+#DEFINE ALIGNEDMASKEDSPRITE
+#include graylib.inc
+.end
+END
