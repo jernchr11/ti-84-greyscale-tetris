@@ -85,18 +85,18 @@ Keys:
       in a,(1)
       cp $FE
       Call z,Down 
-   ld a,(Blah)
+   ld a,(label_6_)
    cp 7
-   jp nz,CowFish
+   jp nz,label_1
    ld a,0
-   ld (Blah),a
+   ld (label_6_),a
    Call Gravity
-CowFish:
+label_1:
       inc a
-   ld (Blah),a
+   ld (label_6_),a
   
    ld b,50
-Super_Delay:
+delay:
    Call TempFill
    Call TempFill
    Call TempFill
@@ -121,7 +121,7 @@ Super_Delay:
    Call TempFill
    Call TempFill
    Call TempFill
-   djnz Super_Delay
+   djnz delay
   ld a,$FF
   nop
   nop
@@ -136,7 +136,7 @@ Super_Delay:
 ;-----------------------------------------------------------------------------------------
 ;-----------------------------------------------------------------------------------------
 ;END OF KEYS
-Blah:
+label_6_:
      .db 0 
 Counter:         ;down
      .db 0
@@ -449,13 +449,13 @@ Move_Pic_Loop:
        ld hl,gsactivebuf2 + 48
      ld a,(Block_Structure+1) ; y cor
   cp 0
-  jr z,Dont_Inc2qq4
+  jr z,Dont_Inc_2
   ld b,a
   ld de,60
 Add_Loop2qq4:
        add hl,de
   djnz Add_Loop2qq4
-Dont_Inc2qq4:
+Dont_Inc_2:
         ld a,(Block_Structure+1)
   ld b,a
   add a,a
@@ -544,57 +544,57 @@ Bottom_Collision:
   add hl,de
         ld a,(Block_Structure+1)
   cp 0
-  jr z,AlignedLolxee
+  jr z,Aligned_1
   ld b,a
   ld de,15
 LoopADDxee:
         add hl,de
   djnz LoopADDxee
-AlignedLolxee:
+Aligned_1:
      ld a,(Block_Structure+2)
   cp 1
-       jr z,Onezxrr
+       jr z,OneLabel
     cp 2
-    jr z,Twozxrr
+    jr z,TwoLabel
     cp 3
-    jr z,Threezxrr
+    jr z,ThreeLabel
     cp 4
-    jr z,Fourzxrr
+    jr z,FourLabel
     cp 5
-    jr z, Fivezxrr
+    jr z, FiveLabel
     cp 6
-    jr z, Sixzxrr
+    jr z, SixLabel
     cp 7
-    jr z,Sevenzxrr
-Onezxrr:
+    jr z,SevenLabel
+OneLabel:
        ld de,PieceOne
     inc de
-    jr Rawrrr
-Twozxrr:
+    jr label_2
+TwoLabel:
        ld de,PieceTwo
        inc de
-       jr Rawrrr
-Threezxrr:
+       jr label_2
+ThreeLabel:
        ld de,PieceThree
        inc de
-       jr Rawrrr
-Fourzxrr:
+       jr label_2
+FourLabel:
        ld de,PieceFour
        inc de
-       jr Rawrrr
-Fivezxrr:
+       jr label_2
+FiveLabel:
        ld de,PieceFive
        inc de
-       jr Rawrrr
-Sixzxrr:
+       jr label_2
+SixLabel:
        ld de,PieceSix
        inc de
-       jr Rawrrr
-Sevenzxrr:
+       jr label_2
+SevenLabel:
        ld de,PieceSeven
        inc de
-       jr Rawrrr
-Rawrrr:   
+       jr label_2
+label_2:   
        ld b,5
 Delete_Loopqq:
        push bc
@@ -602,14 +602,14 @@ Delete_Loopqq:
 Resettt:
        ld a,(de)
     cp 2
-    jr z,Cough
+    jr z,label_5_
     cp 5
-    jr z,Cough
+    jr z,label_5_
     cp 6
-    jr z,Cough
+    jr z,label_5_
     
     jr No_Resettt
-Cough:
+label_5_:
         ld a,(hl)
   cp 1
   jp nz,No_Resettt
@@ -636,57 +636,57 @@ Left_Collide:
   add hl,de
         ld a,(Block_Structure+1)
   cp 0
-  jr z,AlignedLolxeexc
+  jr z,Aligned_1xc
   ld b,a
   ld de,15
 LoopADDxeexc:
         add hl,de
   djnz LoopADDxeexc
-AlignedLolxeexc:
+Aligned_1xc:
      ld a,(Block_Structure+2)
   cp 1
-       jr z,Onezxrrxc
+       jr z,OneLabelxc
     cp 2
-    jr z,Twozxrrxc
+    jr z,TwoLabelxc
     cp 3
-    jr z,Threezxrrxc
+    jr z,ThreeLabelxc
     cp 4
-    jr z,Fourzxrrxc
+    jr z,FourLabelxc
     cp 5
-    jr z,Fivezxrrxc
+    jr z,FiveLabelxc
     cp 6
-    jr z,Sixzxrrxc
+    jr z,SixLabelxc
     cp 7
-    jr z,Sevenzxrrxc
-Onezxrrxc:
+    jr z,SevenLabelxc
+OneLabelxc:
        ld de,PieceOne
     inc de
-    jr Rawrrrxc
-Twozxrrxc:
+    jr label_2xc
+TwoLabelxc:
        ld de,PieceTwo
        inc de
-       jr Rawrrrxc
-Threezxrrxc:
+       jr label_2xc
+ThreeLabelxc:
        ld de,PieceThree
        inc de
-       jr Rawrrrxc
-Fourzxrrxc:
+       jr label_2xc
+FourLabelxc:
        ld de,PieceFour
        inc de
-       jr Rawrrrxc
-Fivezxrrxc:
+       jr label_2xc
+FiveLabelxc:
        ld de,PieceFive
        inc de
-       jr Rawrrrxc
-Sixzxrrxc:
+       jr label_2xc
+SixLabelxc:
        ld de,PieceSix
        inc de
-       jr Rawrrrxc
-Sevenzxrrxc:
+       jr label_2xc
+SevenLabelxc:
        ld de,PieceSeven
        inc de
-       jr Rawrrrxc
-Rawrrrxc:   
+       jr label_2xc
+label_2xc:   
        ld b,4
 Delete_Loopqqxc:
 Resetttxc:
@@ -700,7 +700,7 @@ Resetttxc:
   jr nz,Next_Check
   ld a,1
   ld (CounterB),a
-No_Resetttxc:
+No_Reset_2:
            inc de
     inc de
     inc de
@@ -720,26 +720,26 @@ Next_Check:
 Looped:
            ld a,(de)
            cp 5
-           jr z,Moo
+           jr z,label_4_
            cp 3
-           jr z,Moo
-     jr Lame
-Moo:
+           jr z,label_4_
+     jr label_3_
+label_4_:
            ld a,(hl)
            cp 1
-           jr nz,Lame
+           jr nz,label_3_
       
            ld a,1
            ld (CounterB),a
           
-Lame:
+label_3_:
            inc hl
            inc de
            djnz Looped
            pop bc
            pop de
            pop hl
-           jr No_Resetttxc
+           jr No_Reset_2
     
     
     
@@ -751,59 +751,59 @@ Right_Collide:
   add hl,de
         ld a,(Block_Structure+1)
   cp 0
-  jr z,AlignedLolxeexcaa
+  jr z,Aligned_1xcaa
   ld b,a
   ld de,15
 LoopADDxeexcaa:
         add hl,de
   djnz LoopADDxeexcaa
-AlignedLolxeexcaa:
+Aligned_1xcaa:
      ld a,(Block_Structure+2)
   cp 1
-       jr z,Onezxrrxcaa
+       jr z,OneLabelxcaa
     cp 2
-    jr z,Twozxrrxcaa
+    jr z,TwoLabelxcaa
     cp 3
-    jr z,Threezxrrxcaa
+    jr z,ThreeLabelxcaa
     cp 4
-    jr z,Fourzxrrxcaa
+    jr z,FourLabelxcaa
     cp 5
-    jr z,Fivezxrrxcaa
+    jr z,FiveLabelxcaa
     cp 6
-        jr z,Sixzxrrxcaa
+        jr z,SixLabelxcaa
     cp 7
-        jp z,SevenMoo
-Onezxrrxcaa:
+        jp z,Sevenlabel_4_
+OneLabelxcaa:
        ld de,PieceOne
     inc de
-    jr Rawrrrxcaa
-Twozxrrxcaa:
+    jr label_2xcaa
+TwoLabelxcaa:
        ld de,PieceTwo
        inc de
-       jr Rawrrrxcaa
-Threezxrrxcaa:
+       jr label_2xcaa
+ThreeLabelxcaa:
        ld de,PieceThree
        inc de
-       jr Rawrrrxcaa
-Fourzxrrxcaa:
+       jr label_2xcaa
+FourLabelxcaa:
        ld de,PieceFour
        inc de
-       jr Rawrrrxcaa
-Fivezxrrxcaa:
+       jr label_2xcaa
+FiveLabelxcaa:
        ld de,PieceFive
        inc de
-       jr Rawrrrxcaa
-Sixzxrrxcaa:
+       jr label_2xcaa
+SixLabelxcaa:
        ld de,PieceSix
        inc de
-       jr Rawrrrxcaa
-SevenMoo:
+       jr label_2xcaa
+Sevenlabel_4_:
        ld de,PieceSeven
        inc de
-       jr Rawrrrxcaa  
+       jr label_2xcaa  
    
    
-Rawrrrxcaa:   
+label_2xcaa:   
        inc de
     inc de
     inc de
@@ -849,19 +849,19 @@ Next_Checkaa:
 Loopedaa:
            ld a,(de)
            cp 6
-           jr z,Mooaa
+           jr z,label_4_aa
            cp 4
-           jr z,Mooaa
-     jr Lameaa
-Mooaa:
+           jr z,label_4_aa
+     jr label_3_aa
+label_4_aa:
            ld a,(hl)
            cp 1
-           jr nz,Lameaa
+           jr nz,label_3_aa
       
            ld a,1
            ld (CounterC),a
           
-Lameaa:
+label_3_aa:
            inc hl
            inc de
            djnz Loopedaa
@@ -870,17 +870,6 @@ Lameaa:
            pop hl
            jr No_Resetttxcaa    
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
- 
-
 New_Piece:
   ;-----> Generate a random number
 ; ouput a=answer 0<=a<=255
@@ -921,13 +910,13 @@ SetpieceOne:
   add hl,de
         ld a,(Block_Structure+1)
   cp 0
-  jr z,AlignedLolxx
+  jr z,Aligned_xx
   ld b,a
   ld de,15
 LoopADDxx:
         add hl,de
   djnz LoopADDxx
-AlignedLolxx:
+Aligned_xx:
        
      ld a,(Block_Structure+2)
   cp 1
@@ -947,32 +936,32 @@ AlignedLolxx:
 Onezxx:
        ld de,PieceOne
     inc de
-    jr Rawrx
+    jr label_x
 Twozxx:
        ld de,PieceTwo
        inc de
-       jr Rawrx
+       jr label_x
 Threezxx:
        ld de,PieceThree
        inc de
-       jr Rawrx
+       jr label_x
 Fourzxx:
        ld de,PieceFour
        inc de
-       jr Rawrx
+       jr label_x
 Fivezxx:
        ld de,PieceFive
        inc de
-       jr Rawrx
+       jr label_x
 Sixzxx:
        ld de,PieceSix
        inc de
-       jr Rawrx
+       jr label_x
 Sevenzxx:
        ld de,PieceSeven
        inc de
-       jr Rawrx
-Rawrx:   
+       jr label_x
+label_x:   
        ld b,4
 Delete_Loopx:
        push bc
@@ -1011,13 +1000,13 @@ PieceOneReset:
   add hl,de
         ld a,(Block_Structure+1)
   cp 0
-  jr z,AlignedLolx
+  jr z,Aligned_x
   ld b,a
   ld de,15
 LoopADDx:
         add hl,de
   djnz LoopADDx
-AlignedLolx:
+Aligned_x:
      ld a,(Block_Structure+2)
   cp 1
        jr z,Onezx
@@ -1036,32 +1025,32 @@ AlignedLolx:
 Onezx:
        ld de,PieceOne
     inc de
-    jr Rawr
+    jr label_
 Twozx:
        ld de,PieceTwo
        inc de
-       jr Rawr
+       jr label_
 Threezx:
        ld de,PieceThree
        inc de
-       jr Rawr
+       jr label_
 Fourzx:
        ld de,PieceFour
        inc de
-       jr Rawr
+       jr label_
 Fivezx:
        ld de,PieceFive
        inc de
-       jr Rawr
+       jr label_
 Sixzx:
        ld de,PieceSix
        inc de
-       jr Rawr
+       jr label_
 Sevenzx:
        ld de,PieceSeven
        inc de
-       jr Rawr
-Rawr:   
+       jr label_
+label_:   
        ld b,4
 Delete_Loop:
        push bc
@@ -1085,30 +1074,6 @@ No_Reset:
     pop bc
     djnz Delete_Loop
     ret  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   
 Draw_Tetris_Piece1:
       ld hl,gsActivebuf1 + 48
@@ -1193,7 +1158,7 @@ Next2:
 Draw_Loop:
        push bc
        ld b,4   
-Funny_Loop:
+loop_2:
        push af
        ld a,(de)
     cp 1
@@ -1219,7 +1184,7 @@ Skip_Tile:
     inc a
     inc a
     inc de
-    djnz Funny_Loop
+    djnz loop_2
     ld b,20
     sub b
     push de
@@ -1313,7 +1278,7 @@ Next21:
 Draw_Loop1:
        push bc
        ld b,4   
-Funny_Loop1:
+Draw_Loop2:
        push af
        ld a,(de)
     cp 1
@@ -1339,7 +1304,7 @@ Skip_Tile1:
     inc a
     inc a
     inc de
-    djnz Funny_Loop1
+    djnz Draw_Loop2
     ld b,20
     sub b
     push de
@@ -1349,19 +1314,6 @@ Skip_Tile1:
     pop bc
     djnz Draw_Loop1
     ret   
-   
-   
-   
-   
-   
-   
-   
-
-   
-   
-   
-     
-  
    
 Draw_Sprite:
 PutSpriteXOR:
