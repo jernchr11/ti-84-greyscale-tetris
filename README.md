@@ -1,7 +1,7 @@
 # Greyscale Tetris
 An awesome game of Tetris for the TI-83 and TI-84 calculators that I wrote in 2008. 🙂
 
-For more info about uploading the game to your calculator, see https://www.ticalc.org/archives/files/fileinfo/429/42979.html.
+For more info about uploading the game to your calculator, see https://www.ticalc.org/archives/files/fileinfo/406/40646.html.
 
 The source code is written in [z80 assembly language](https://tutorials.eeems.ca/ASMin28Days/lesson/toc.html).
 
