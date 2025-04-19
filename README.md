@@ -1,5 +1,5 @@
 # Greyscale Tetris
-An awesome game of Tetris for the TI-83 and TI-84 calculators. 🙂
+An awesome game of Tetris for the TI-83 and TI-84 calculators that I wrote in 2008. 🙂
 
 For more info about uploading the game to your calculator, see https://www.ticalc.org/archives/files/fileinfo/429/42979.html.
 
